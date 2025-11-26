@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Study Buddy - Padhai Ka Sathi</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .tool-card { backdrop-filter: blur(10px); background: rgba(255,255,255,0.95); }
+        .timer-circle { 
+            background: conic-gradient(#667eea var(--progress), #e5e7eb var(--progress));
+            border-radius: 50%;
+        }
+        .note-item:hover { background: #f3f4f6; }
+        .flashcard { perspective: 1000px; }
+        .flashcard-inner { transition: transform 0.6s; transform-style: preserve-3d; }
+        .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back { backface-visibility: hidden; }
+        .flashcard-back { transform: rotateY(180deg); }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Header -->
+    <header class="text-white py-6 px-4">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">📚 Study Buddy</h1>
+            <p class="text-xl opacity-90">Padhai Ka Sathi - Aapki Success Ka Partner!</p>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="max-w-6xl mx-auto px-4 mb-6">
+        <div class="flex flex-wrap justify-center gap-2">
+            <button onclick="showTool('pomodoro')" class="tab-btn px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition" data-tab="pomodoro">⏱️ Pomodoro Timer</button>
+            <button onclick="showTool('notes')" class="tab-btn px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition" data-tab="notes">📝 Notes</button>
+            <button onclick="showTool('todo')" class="tab-btn px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition" data-tab="todo">✅ To-Do List</button>
+            <button onclick="showTool('flashcards')" class="tab-btn px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition" data-tab="flashcards">🎴 Flashcards</button>
+            <button onclick="showTool('calculator')" class="tab-btn px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition" data-tab="calculator">🔢 Calculator</button>
+            <button onclick="showTool('quotes')" class="tab-btn px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition" data-tab="quotes">💪 Motivation</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 pb-10">
+        
+        <!-- 1. Pomodoro Timer -->
+        <div id="pomodoro" class="tool-section tool-card rounded-3xl p-8 card-hover">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">⏱️ Pomodoro Timer (45 Min Study Session)</h2>
+            <div class="flex flex-col items-center">
+                <div class="timer-circle w-64 h-64 flex items-center justify-center mb-6" style="--progress: 0%">
+                    <div class="bg-white w-56 h-56 rounded-full flex flex-col items-center justify-center">
+                        <span id="timer-display" class="text-5xl font-bold text-gray-800">45:00</span>
+                        <span id="timer-status" class="text-gray-500 mt-2">Ready to Study!</span>
+                    </div>
+                </div>
+                <div class="flex gap-4 mb-4">
+                    <button onclick="startTimer()" class="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold transition">▶️ Start</button>
+                    <button onclick="pauseTimer()" class="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-semibold transition">⏸️ Pause</button>
+                    <button onclick="resetTimer()" class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition">🔄 Reset</button>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="setTimer(45)" class="px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition">45 min</button>
+                    <button onclick="setTimer(25)" class="px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition">25 min</button>
+                    <button onclick="setTimer(10)" class="px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition">10 min Break</button>
+                </div>
+                <p class="text-gray-500 mt-4 text-center">🎯 Sessions Completed Today: <span id="session-count" class="font-bold text-purple-600">0</span></p>
+            </div>
+        </div>
+
+        <!-- 2. Quick Notes -->
+        <div id="notes" class="tool-section tool-card rounded-3xl p-8 card-hover hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📝 Quick Notes</h2>
+            <div class="mb-4">
+                <input type="text" id="note-title" placeholder="Note Title..." class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl mb-2 focus:border-purple-500 outline-none">
+                <textarea id="note-content" placeholder="Apne notes yahan likho..." class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl h-32 focus:border-purple-500 outline-none resize-none"></textarea>
+                <button onclick="saveNote()" class="mt-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold transition">💾 Save Note</button>
+            </div>
+            <div id="notes-list" class="space-y-3 max-h-80 overflow-y-auto">
+                <!-- Notes will appear here -->
+            </div>
+        </div>
+
+        <!-- 3. To-Do List -->
+        <div id="todo" class="tool-section tool-card rounded-3xl p-8 card-hover hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">✅ Study To-Do List</h2>
+            <div class="flex gap-2 mb-6">
+                <input type="text" id="todo-input" placeholder="Naya task add karo..." class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 outline-none" onkeypress="if(event.key==='Enter')addTodo()">
+                <button onclick="addTodo()" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold transition">➕ Add</button>
+            </div>
+            <div id="todo-list" class="space-y-2 max-h-96 overflow-y-auto">
+                <!-- Todos will appear here -->
+            </div>
+            <div class="mt-4 text-center text-gray-500">
+                <span>Pending: <span id="pending-count" class="font-bold text-red-500">0</span></span> | 
+                <span>Done: <span id="done-count" class="font-bold text-green-500">0</span></span>
+            </div>
+        </div>
+
+        <!-- 4. Flashcards -->
+        <div id="flashcards" class="tool-section tool-card rounded-3xl p-8 card-hover hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">🎴 Flashcards - Yaad Karo Asaani Se!</h2>
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <input type="text" id="flash-question" placeholder="Question / Front side..." class="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 outline-none">
+                <input type="text" id="flash-answer" placeholder="Answer / Back side..." class="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 outline-none">
+            </div>
+            <button onclick="addFlashcard()" class="w-full mb-6 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold transition">➕ Add Flashcard</button>
+            
+            <div id="flashcard-display" class="flashcard w-full h-48 cursor-pointer mb-4 hidden" onclick="flipCard()">
+                <div class="flashcard-inner w-full h-full relative">
+                    <div class="flashcard-front absolute w-full h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white text-xl font-semibold p-6 text-center"></div>
+                    <div class="flashcard-back absolute w-full h-full bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl flex items-center justify-center text-white text-xl font-semibold p-6 text-center"></div>
+                </div>
+            </div>
+            <div class="flex justify-center gap-4">
+                <button onclick="prevCard()" class="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-xl transition">⬅️ Previous</button>
+                <span id="card-counter" class="px-4 py-2 text-gray-600">0/0</span>
+                <button onclick="nextCard()" class="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-xl transition">Next ➡️</button>
+            </div>
+        </div>
+
+        <!-- 5. Calculator -->
+        <div id="calculator" class="tool-section tool-card rounded-3xl p-8 card-hover hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">🔢 Scientific Calculator</h2>
+            <div class="max-w-sm mx-auto">
+                <input type="text" id="calc-display" class="w-full px-4 py-4 text-right text-2xl font-mono bg-gray-100 rounded-xl mb-4" readonly>
+                <div class="grid grid-cols-4 gap-2">
+                    <button onclick="clearCalc()" class="col-span-2 p-4 bg-red-400 hover:bg-red-500 text-white rounded-xl font-bold transition">AC</button>
+                    <button onclick="appendCalc('(')" class="p-4 bg-gray-300 hover:bg-gray-400 rounded-xl font-bold transition">(</button>
+                    <button onclick="appendCalc(')')" class="p-4 bg-gray-300 hover:bg-gray-400 rounded-xl font-bold transition">)</button>
+                    
+                    <button onclick="appendCalc('7')" class="p-4 bg-white hover:bg-gray-100 rounded-xl font-bold transition shadow">7</button>
+                    <button onclick="appendCalc('8')" class="p-4 bg-white hover:bg-gray-100 rounded-xl font-bold transition shadow">8</button>
+                    <button onclick="appendCalc('9')" class="p-4 bg-white hover:bg-gray-100 rounded-xl font-bold transition shadow">9</button>
+                    <button onclick="appendCalc('/')" class="p-4 bg-purple-400 hover:bg-purple-500 text-white rounded-xl font-bold transition">÷</button>
+                    
+                    <button onclick="appendCalc('4')" class="p-4 bg-white hover:bg-gray-100 rounded-xl font-bold transition shadow">4</button>
+                    <button onclick="appendCalc('5')" class="p-4 bg-white hover:bg-gray-100 rounded-xl font-bold transition shadow">5</button>
+                    <button onclick="appendCalc('6')" class="p-4 bg-white hover:bg-gray-100 rounded-xl font-bold transition shadow">6</button>
+                    <button onclick="appendCalc('*')" class="p-4 bg-purple-400 hover:bg-purple-500 text-white rounded-xl font-bold transition">×</button>
+                    
+                    <button onclick="appendCalc('1')" class="p-4 bg-white hover:bg-gray-100 rounded-xl font-bold transition shadow">1</button>
+                    <button onclick="appendCalc('2')" class="p-4 bg-white hover:bg-gray-100 rounded-xl font-bold transition shadow">2</button>
+                    <button onclick="appendCalc('3')" class="p-4 bg-white hover:bg-gray-100 rounded-xl font-bold transition shadow">3</button>
+                    <button onclick="appendCalc('-')" class="p-4 bg-purple-400 hover:bg-purple-500 text-white rounded-xl font-bold transition">−</button>
+                    
+                    <button onclick="appendCalc('0')" class="p-4 bg-white hover:bg-gray-100 rounded-xl font-bold transition shadow">0</button>
+                    <button onclick="appendCalc('.')" class="p-4 bg-white hover:bg-gray-100 rounded-xl font-bold transition shadow">.</button>
+                    <button onclick="calculate()" class="p-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold transition">=</button>
+                    <button onclick="appendCalc('+')" class="p-4 bg-purple-400 hover:bg-purple-500 text-white rounded-xl font-bold transition">+</button>
+                    
+                    <button onclick="appendCalc('Math.sqrt(')" class="p-4 bg-gray-300 hover:bg-gray-400 rounded-xl font-bold transition text-sm">√</button>
+                    <button onclick="appendCalc('**2')" class="p-4 bg-gray-300 hover:bg-gray-400 rounded-xl font-bold transition text-sm">x²</button>
+                    <button onclick="appendCalc('Math.PI')" class="p-4 bg-gray-300 hover:bg-gray-400 rounded-xl font-bold transition text-sm">π</button>
+                    <button onclick="appendCalc('%')" class="p-4 bg-gray-300 hover:bg-gray-400 rounded-xl font-bold transition">%</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Motivation Quotes -->
+        <div id="quotes" class="tool-section tool-card rounded-3xl p-8 card-hover hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">💪 Daily Motivation</h2>
+            <div class="text-center">
+                <div class="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl p-8 mb-6">
+                    <p id="quote-text" class="text-2xl font-semibold mb-4">"Mehnat itni khamoshi se karo ki success shor macha de!"</p>
+                    <p id="quote-author" class="text-lg opacity-90">- Unknown</p>
+                </div>
+                <button onclick="newQuote()" class="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold transition">🔄 New Quote</button>
+                
+                <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-blue-100 p-4 rounded-xl">
+                        <div class="text-3xl mb-2">📖</div>
+                        <p class="font-semibold text-blue-700">Focus</p>
+                    </div>
+                    <div class="bg-green-100 p-4 rounded-xl">
+                        <div class="text-3xl mb-2">🎯</div>
+                        <p class="font-semibold text-green-700">Goals</p>
+                    </div>
+                    <div class="bg-yellow-100 p-4 rounded-xl">
+                        <div class="text-3xl mb-2">⭐</div>
+                        <p class="font-semibold text-yellow-700">Success</p>
+                    </div>
+                    <div class="bg-pink-100 p-4 rounded-xl">
+                        <div class="text-3xl mb-2">💯</div>
+                        <p class="font-semibold text-pink-700">Hard Work</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-white/70 py-6">
+        <p>Made with ❤️ for Students | Study Smart, Not Hard! 📚</p>
+    </footer>
+
+    <script>
+        // ============ POMODORO TIMER ============
+        let timerInterval;
+        let timeLeft = 45 * 60; // 45 minutes in seconds
+        let totalTime = 45 * 60;
+        let isRunning = false;
+        let sessionCount = parseInt(localStorage.getItem('sessionCount')) || 0;
+
+        document.getElementById('session-count').textContent = sessionCount;
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer-display').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            const progress = ((totalTime - timeLeft) / totalTime) * 100;
+            document.querySelector('.timer-circle').style.setProperty('--progress', `${progress}%`);
+        }
+
+        function startTimer() {
+            if (!isRunning && timeLeft > 0) {
+                isRunning = true;
+                document.getElementById('timer-status').textContent = '🔥 Focus Mode ON!';
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    if (timeLeft === 0) {
+                        pauseTimer();
+                        sessionCount++;
+                        localStorage.setItem('sessionCount', sessionCount);
+                        document.getElementById('session-count').textContent = sessionCount;
+                        document.getElementById('timer-status').textContent = '🎉 Session Complete!';
+                        alert('🎉 Bahut Badhiya! Ek session complete ho gaya! Break lo!');
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            document.getElementById('timer-status').textContent = '⏸️ Paused';
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timeLeft = totalTime;
+            updateTimerDisplay();
+            document.getElementById('timer-status').textContent = 'Ready to Study!';
+        }
+
+        function setTimer(minutes) {
+            pauseTimer();
+            totalTime = minutes * 60;
+            timeLeft = totalTime;
+            updateTimerDisplay();
+            document.getElementById('timer-status').textContent = 'Ready to Study!';
+        }
+
+        // ============ NOTES ============
+        let notes = JSON.parse(localStorage.getItem('studyNotes')) || [];
+
+        function saveNote() {
+            const title = document.getElementById('note-title').value.trim();
+            const content = document.getElementById('note-content').value.trim();
+            if (title && content) {
+                notes.unshift({ title, content, date: new Date().toLocaleString() });
+                localStorage.setItem('studyNotes', JSON.stringify(notes));
+                document.getElementById('note-title').value = '';
+                document.getElementById('note-content').value = '';
+                renderNotes();
+            }
+        }
+
+        function deleteNote(index) {
+            notes.splice(index, 1);
+            localStorage.setItem('studyNotes', JSON.stringify(notes));
+            renderNotes();
+        }
+
+        function renderNotes() {
+            const list = document.getElementById('notes-list');
+            list.innerHTML = notes.map((note, i) => `
+                <div class="note-item bg-gray-50 p-4 rounded-xl border-l-4 border-purple-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold text-gray-800">${note.title}</h3>
+                            <p class="text-gray-600 text-sm mt-1">${note.content}</p>
+                            <span class="text-xs text-gray-400">${note.date}</span>
+                        </div>
+                        <button onclick="deleteNote(${i})" class="text-red-500 hover:text-red-700">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ============ TO-DO LIST ============
+        let todos = JSON.parse(localStorage.getItem('studyTodos')) || [];
+
+        function addTodo() {
+            const input = document.getElementById('todo-input');
+            const text = input.value.trim();
+            if (text) {
+                todos.push({ text, done: false });
+                localStorage.setItem('studyTodos', JSON.stringify(todos));
+                input.value = '';
+                renderTodos();
+            }
+        }
+
+        function toggleTodo(index) {
+            todos[index].done = !todos[index].done;
+            localStorage.setItem('studyTodos', JSON.stringify(todos));
+            renderTodos();
+        }
+
+        function deleteTodo(index) {
+            todos.splice(index, 1);
+            localStorage.setItem('studyTodos', JSON.stringify(todos));
+            renderTodos();
+        }
+
+        function renderTodos() {
+            const list = document.getElementById('todo-list');
+            list.innerHTML = todos.map((todo, i) => `
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl ${todo.done ? 'opacity-60' : ''}">
+                    <input type="checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTodo(${i})" class="w-5 h-5 accent-purple-600">
+                    <span class="${todo.done ? 'line-through text-gray-400' : 'text-gray-700'} flex-1">${todo.text}</span>
+                    <button onclick="deleteTodo(${i})" class="text-red-500 hover:text-red-700">🗑️</button>
+                </div>
+            `).join('');
+            
+            document.getElementById('pending-count').textContent = todos.filter(t => !t.done).length;
+            document.getElementById('done-count').textContent = todos.filter(t => t.done).length;
+        }
+
+        // ============ FLASHCARDS ============
+        let flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
+        let currentCard = 0;
+
+        function addFlashcard() {
+            const question = document.getElementById('flash-question').value.trim();
+            const answer = document.getElementById('flash-answer').value.trim();
+            if (question && answer) {
+                flashcards.push({ question, answer });
+                localStorage.setItem('flashcards', JSON.stringify(flashcards));
+                document.getElementById('flash-question').value = '';
+                document.getElementById('flash-answer').value = '';
+                showFlashcard();
+            }
+        }
+
+        function showFlashcard() {
+            if (flashcards.length > 0) {
+                document.getElementById('flashcard-display').classList.remove('hidden');
+                document.getElementById('flashcard-display').classList.remove('flipped');
+                document.querySelector('.flashcard-front').textContent = flashcards[currentCard].question;
+                document.querySelector('.flashcard-back').textContent = flashcards[currentCard].answer;
+                document.getElementById('card-counter').textContent = `${currentCard + 1}/${flashcards.length}`;
+            }
+        }
+
+        function flipCard() {
+            document.getElementById('flashcard-display').classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            if (flashcards.length > 0) {
+                currentCard = (currentCard + 1) % flashcards.length;
+                showFlashcard();
+            }
+        }
+
+        function prevCard() {
+            if (flashcards.length > 0) {
+                currentCard = (currentCard - 1 + flashcards.length) % flashcards.length;
+                showFlashcard();
+            }
+        }
+
+        // ============ CALCULATOR ============
+        function appendCalc(value) {
+            document.getElementById('calc-display').value += value;
+        }
+
+        function clearCalc() {
+            document.getElementById('calc-display').value = '';
+        }
+
+        function calculate() {
+            try {
+                const result = eval(document.getElementById('calc-display').value);
+                document.getElementById('calc-display').value = result;
+            } catch {
+                document.getElementById('calc-display').value = 'Error';
+            }
+        }
+
+        // ============ MOTIVATION QUOTES ============
+        const quotes = [
+            { text: "Mehnat itni khamoshi se karo ki success shor macha de!", author: "Unknown" },
+            { text: "Sapne wo nahi jo neend mein aaye, sapne wo hain jo neend na aane de!", author: "APJ Abdul Kalam" },
+            { text: "Mushkil waqt guzar jayega, lekin koshish mat chhodo!", author: "Unknown" },
+            { text: "Aaj ki mehnat kal ki kamyabi hai!", author: "Unknown" },
+            { text: "Padho itna ki duniya puchhe - yeh kaun hai!", author: "Unknown" },
+            { text: "Haar mano mat, jeet tumhari hogi!", author: "Unknown" },
+            { text: "Success ka koi shortcut nahi hota!", author: "Unknown" },
+            { text: "Ek din sab kehenge - isne kar dikhaya!", author: "Unknown" },
+            { text: "Focus karo goal pe, result apne aap aayega!", author: "Unknown" },
+            { text: "Hard work beats talent when talent doesn't work hard!", author: "Tim Notke" },
+            { text: "Topper banna hai to comfort zone chhodo!", author: "Unknown" },
+            { text: "Aaj ka struggle kal ki story banega!", author: "Unknown" }
+        ];
+
+        function newQuote() {
+            const quote = quotes[Math.floor(Math.random() * quotes.length)];
+            document.getElementById('quote-text').textContent = `"${quote.text}"`;
+            document.getElementById('quote-author').textContent = `- ${quote.author}`;
+        }
+
+        // ============ NAVIGATION ============
+        function showTool(toolId) {
+            document.querySelectorAll('.tool-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(toolId).classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-white/40');
+                btn.classList.add('bg-white/20');
+            });
+            document.querySelector(`[data-tab="${toolId}"]`).classList.remove('bg-white/20');
+            document.querySelector(`[data-tab="${toolId}"]`).classList.add('bg-white/40');
+        }
+
+        // Initialize
+        renderNotes();
+        renderTodos();
+        showFlashcard();
+        showTool('pomodoro');
+    </script>
+</body>
+</html>
